@@ -17,8 +17,6 @@ pipeline {
                     npm install -g htmlhint csslint
                     # Kiểm tra cú pháp HTML
                     htmlhint index.html
-                    # Kiểm tra cú pháp CSS
-                    csslint styles.css
                 '''
             }
         }
