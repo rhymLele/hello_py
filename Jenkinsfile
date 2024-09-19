@@ -1,62 +1,46 @@
 pipeline {
     agent any
 
-    environment {
-        PYTHON_ENV = 'production'
-    }
-
     stages {
         stage('Checkout') {
             steps {
                 // Lấy mã nguồn từ repository
-                git 'https://github.com/username/my-python-app.git'
+                git 'https://github.com/rhymLele/hello_py.git'
             }
         }
 
-        stage('Setup Python') {
+        stage('Lint HTML & CSS') {
             steps {
-                // Thiết lập môi trường Python
-                sh 'python3 -m venv venv'
-                sh 'source venv/bin/activate'
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
-                // Cài đặt các package cần thiết
-                sh '. venv/bin/activate && pip install -r requirements.txt'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                // Chạy kiểm thử với pytest
-                sh '. venv/bin/activate && pytest'
+                // Kiểm tra cú pháp của HTML và CSS
+                sh '''
+                    # Cài đặt công cụ kiểm tra cú pháp nếu cần (chỉ thực hiện một lần)
+                    npm install -g htmlhint csslint
+                    # Kiểm tra cú pháp HTML
+                    htmlhint index.html
+                    # Kiểm tra cú pháp CSS
+                    csslint styles.css
+                '''
             }
         }
 
         stage('Deploy') {
             steps {
-                // Triển khai ứng dụng lên máy chủ hoặc môi trường staging
-                echo 'Triển khai ứng dụng...'
+                // Triển khai các file lên môi trường (ví dụ: server hoặc cloud)
+                echo 'Đang triển khai các file HTML và CSS...'
+                // Lệnh triển khai cụ thể (ví dụ: SCP, rsync, hoặc deploy đến một hosting service)
+                sh '''
+                    scp -r ./index.html ./styles.css user@server:/path/to/deploy
+                '''
             }
         }
     }
 
     post {
-        always {
-            // Lưu kết quả kiểm thử
-            archiveArtifacts artifacts: '**/*.log', allowEmptyArchive: true
-        }
-
         success {
-            // Thông báo khi kiểm thử thành công
-            echo 'Build và kiểm thử thành công!'
+            echo 'Pipeline thành công! HTML và CSS đã được kiểm tra và triển khai.'
         }
-
         failure {
-            // Thông báo khi kiểm thử thất bại
-            echo 'Build hoặc kiểm thử thất bại!'
+            echo 'Pipeline thất bại! Có lỗi trong quá trình kiểm tra hoặc triển khai.'
         }
     }
 }
