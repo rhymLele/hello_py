@@ -2,67 +2,57 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
+        stage('Clone Repository') {
             steps {
-                // Lấy mã nguồn từ repository
-                git 'https://github.com/rhymLele/hello_py.git'
+                echo 'Cloning repository...'
+                git 'https://github.com/Toan211203/emo2_jenkin.git'
             }
         }
-        stage('Push Docker Image')
-        {
-            steps{
-               // This step should not normally be used in your script. Consult the inline help for details.
-            withDockerRegistry(credentialsId: 'docker-hub', url: 'https://index.docker.io/v1/') {
-                sh 'docker build -t mihduc18/html-v1 .'
-                sh 'docker push -t mihduc18/html-v1'
-    // some block
-}     
-            }
-        }
-        stage('Install Node.js and npm') {
+        stage('Build') {
             steps {
-                // Kiểm tra và cài đặt Node.js và npm nếu cần thiết
-                sh '''
-                    if ! command -v npm &> /dev/null
-                    then
-                        curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-                        sudo apt install -y nodejs
-                    fi
-                    node -v
-                    npm -v
-                '''
+                echo 'Building...'
+                sh 'python3 hello.py'  // Sử dụng python3
             }
         }
-        stage('Lint HTML & CSS') {
+        stage('Test') {
             steps {
-                // Kiểm tra cú pháp của HTML và CSS
-                sh '''
-                    # Cài đặt công cụ kiểm tra cú pháp nếu cần (chỉ thực hiện một lần)
-                    npm install -g htmlhint csslint
-                    # Kiểm tra cú pháp HTML
-                    htmlhint index.html
-                '''
+                echo 'Testing...'
+                script {
+                    if (fileExists('hello.py')) {
+                        echo 'File hello.py found. Displaying its content:'
+                        
+                        // Đọc nội dung file hello.py và in ra console
+                        def content = readFile('hello.py')
+                        echo "${content}"
+        
+                        // Chạy script hello.py và in ra đầu ra
+                        echo 'Running the script...'
+                        def output = sh(script: 'python3 hello.py', returnStdout: true).trim()
+                        echo "Output from hello.py: ${output}"
+                    } else {
+                        error 'File hello.py does not exist!'
+                    }
+                }
             }
         }
-
         stage('Deploy') {
             steps {
-                // Triển khai các file lên môi trường (ví dụ: server hoặc cloud)
-                echo 'Đang triển khai các file HTML và CSS...'
-                // Lệnh triển khai cụ thể (ví dụ: SCP, rsync, hoặc deploy đến một hosting service)
-                sh '''
-                    scp -r ./index.html ./styles.css user@server:/path/to/deploy
-                '''
+                echo 'Deploying...'
+                // Thêm lệnh deploy ở đây
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline thành công! HTML và CSS đã được kiểm tra và triển khai.'
+            echo 'Pipeline completed successfully!'
         }
         failure {
-            echo 'Pipeline thất bại! Có lỗi trong quá trình kiểm tra hoặc triển khai.'
+            echo 'Pipeline failed.'
+        }
+        always {
+            echo 'Cleaning up...'
+            // Thêm lệnh dọn dẹp nếu cần
         }
     }
 }
