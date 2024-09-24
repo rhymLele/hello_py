@@ -11,7 +11,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building...'
-                sh 'python3 hello.py'  // Sử dụng python3
+                sh 'python3 hello3.py'  // Sử dụng python3
             }
         }
         stage('Test') {
