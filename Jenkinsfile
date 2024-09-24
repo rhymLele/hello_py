@@ -8,6 +8,17 @@ pipeline {
                 git 'https://github.com/rhymLele/hello_py.git'
             }
         }
+        stage('Push Docker Image')
+        {
+            steps{
+               // This step should not normally be used in your script. Consult the inline help for details.
+            withDockerRegistry(credentialsId: 'docker-hub', url: 'https://index.docker.io/v1/') {
+                sh 'docker build -t mihduc18/html-v1'
+                sh 'docker push -t mihduc18/html-v1'
+    // some block
+}     
+            }
+        }
         stage('Install Node.js and npm') {
             steps {
                 // Kiểm tra và cài đặt Node.js và npm nếu cần thiết
