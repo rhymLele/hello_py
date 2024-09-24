@@ -8,7 +8,20 @@ pipeline {
                 git 'https://github.com/rhymLele/hello_py.git'
             }
         }
-
+        stage('Install Node.js and npm') {
+            steps {
+                // Kiểm tra và cài đặt Node.js và npm nếu cần thiết
+                sh '''
+                    if ! command -v npm &> /dev/null
+                    then
+                        curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+                        sudo apt install -y nodejs
+                    fi
+                    node -v
+                    npm -v
+                '''
+            }
+        }
         stage('Lint HTML & CSS') {
             steps {
                 // Kiểm tra cú pháp của HTML và CSS
